@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Troll Menu – FE Script Action Notification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="https://xlzy520.cn/icons/lo.ico">
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background-color: #222;
+      color: #fff;
+    }
+    .drop-zone {
+      width: 300px;
+      height: 300px;
+      background-color: #c7254e;
+      margin-bottom: 20px;
+      border: 2px dashed #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+    .draggable-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .draggable-item {
+      width: 130px;
+      height: 130px;
+      background-color: #444;
+      border: 1px solid #666;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 5px;
+      user-select: none;
+    }
+    .notification {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background-color: #333;
+      padding: 15px;
+      border-radius: 5px;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.8);
+    }
+    .notification.active {
+      display: flex;
+    }
+    .toggle-button {
+      padding: 5px 10px;
+      cursor: pointer;
+      background-color: #555;
+      color: #fff;
+      border: none;
+      border-radius: 3px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body ondragover="allowDrop(event)" ondrop="drop(event)">
+  <div class="drop-zone" id="dropZone">
+    Drop FE Script Here
+  </div>
+  
+  <div class="draggable-container">
+    <div class="draggable-item" id="FE_BestHatFling" draggable="true" ondragstart="drag(event)">
+      Best Hat Fling
+    </div>
+    <div class="draggable-item" id="FE_InvisibleFling" draggable="true" ondragstart="drag(event)">
+      Invisible Fling
+    </div>
+    <div class="draggable-item" id="FE_FlyScript" draggable="true" ondragstart="drag(event)">
+      Fly Script
+    </div>
+  </div>
+  
+  <div class="notification" id="notification">
+    <div id="notifText">FE Script: Activated <span id="scriptName"></span></div>
+    <button class="toggle-button" id="toggleBtn">Toggle Off</button>
+  </div>
+  
+  <script>
+    const scripts = {
+      "FE_BestHatFling": "https://your-script-source/best-hat-fling.lua",
+      "FE_InvisibleFling": "https://your-script-source/invisible-fling.lua",
+      "FE_FlyScript": "https://your-script-source/fly-script.lua"
+    };
+    
+    let currentScript = null;
+    
+    function drag(ev) {
+      ev.dataTransfer.setData("text/plain", ev.target.id);
+    }
+    
+    function allowDrop(ev) {
+      ev.preventDefault();
+    }
+    
+    function drop(ev) {
+      ev.preventDefault();
+      let scriptId = ev.dataTransfer.getData("text/plain");
+      if (scripts[scriptId]) {
+        activateScript(scriptId);
+      }
+    }
+    
+    function activateScript(scriptId) {
+      currentScript = scriptId;
+      const scriptName = scriptId.replace(/_/g, " ");
+      document.getElementById('scriptName').textContent = scriptName;
+      document.getElementById('notification').classList.add('active');
+
+      fetch(scripts[scriptId])
+        .then(response => response.text())
+        .then(code => {
+          eval(code);
+          console.log("Script executed:", scriptName);
+        })
+        .catch(err => console.error("Failed to load script:", err));
+      
+      document.getElementById('toggleBtn').textContent = "Toggle Off";
+    }
+    
+    document.getElementById('toggleBtn').addEventListener('click', function() {
+      if (currentScript) {
+        if (this.textContent === "Toggle Off") {
+          console.log("Script disabled:", currentScript);
+          this.textContent = "Toggle On";
+        } else {
+          console.log("Reactivating script:", currentScript);
+          activateScript(currentScript);
+        }
+      }
+    });
+  </script>
+</body>
+</html>
